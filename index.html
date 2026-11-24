@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Griechisch lernen</title>
+<style>
+:root{--bg:#eef3f7;--surf:#fff;--ink:#12263a;--mute:#5d7184;--acc:#1b5fa8;--acc2:#e8f0f9;--ok:#2f7d4f;--bad:#b3402f;--line:#cfdbe6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a26;--surf:#162636;--ink:#e6eef6;--mute:#90a5b8;--acc:#6aaef0;--acc2:#1d3249;--ok:#6cc58d;--bad:#ef8b7a;--line:#2a4056;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a26;--surf:#162636;--ink:#e6eef6;--mute:#90a5b8;--acc:#6aaef0;--acc2:#1d3249;--ok:#6cc58d;--bad:#ef8b7a;--line:#2a4056;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Serif","Georgia",serif;-webkit-text-size-adjust:100%}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:8px 0 14px;font-weight:700}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+.tab{flex:1;padding:10px;border:1px solid var(--line);background:var(--surf);border-radius:10px;font-weight:600}
+.tab[aria-selected="true"]{background:var(--acc);color:#fff;border-color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.card{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.card .t{flex:1}
+.gr{font-size:1.35rem;font-weight:700}
+.tr{color:var(--mute);font-size:.9rem;font-style:italic}
+.de{font-size:1rem}
+.ph{color:var(--acc);font-size:1rem}
+.play{width:46px;height:46px;border-radius:50%;border:none;background:var(--acc2);color:var(--acc);font-size:1.2rem;flex:none}
+.play:active{transform:scale(.94)}
+.note{background:var(--acc2);border-radius:10px;padding:10px 12px;font-size:.88rem;margin-bottom:12px;display:none}
+.seg{display:flex;gap:6px;margin-bottom:14px}
+.seg button{flex:1;padding:8px;border:1px solid var(--line);background:var(--surf);border-radius:10px;font-size:.9rem}
+.seg button[aria-pressed="true"]{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc);font-weight:600}
+.q{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center;margin-bottom:12px}
+.q .gr{font-size:2rem}
+.meta{color:var(--mute);font-size:.85rem;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;padding:14px;margin-bottom:8px;border:1px solid var(--line);background:var(--surf);border-radius:10px;font-size:1.05rem}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--surf))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--surf))}
+.opt[disabled]{cursor:default}
+.primary{width:100%;padding:14px;border:none;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:1rem}
+.res{text-align:center;padding:20px}
+.res .big{font-size:2.6rem;font-weight:700;color:var(--acc)}
+[hidden]{display:none!important}
+body.run{background:#000}
+body.run .tabs,body.run details,body.run #lesson{display:none}
+body.run #lstop{background:#1a1a1a!important;color:#9a9a9a!important;border:1px solid #333!important}
+</style>
+</head>
+<body>
+<main>
+<div class="meta" id="goal" style="margin-bottom:4px"></div>
+<div id="goalwrap" style="height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px"><div id="goalbar" style="height:100%;background:var(--acc)"></div></div>
+<select id="lesson" aria-label="Lektion" style="width:100%;padding:12px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);font:inherit;font-weight:600">
+  <option value="0">Lektion 1: Grundwörter</option>
+  <option value="1">Lektion 2: Unterwegs und am Tisch</option>
+  <option value="2">Lektion 3: Farben, Tage und Wichtiges</option>
+  <option value="3">Lektion 4: Zahlen und erste Verben</option>
+  <option value="4">Lektion 5: Personen, Orte, Richtungen</option>
+  <option value="5">Lektion 6: Essen und Trinken</option>
+  <option value="6">Lektion 7: Einkaufen und Kleidung</option>
+  <option value="7">Lektion 8: Familie, Körper, Gesundheit</option>
+  <option value="all">Alle Lektionen gemischt</option>
+</select>
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t1" aria-selected="true">Wörter</button>
+  <button class="tab" role="tab" id="t2" aria-selected="false">Quiz</button>
+  <button class="tab" role="tab" id="t3" aria-selected="false">Hören</button>
+</div>
+<details style="margin-bottom:12px"><summary style="cursor:pointer;color:var(--acc);font-weight:600">Stimme und Tempo einstellen</summary>
+<div style="display:flex;gap:8px;margin-top:8px">
+<select id="voiceSel" aria-label="Stimme" style="flex:2;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);font:inherit"></select>
+<select id="rateSel" aria-label="Tempo" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);font:inherit"><option value="0.6">langsam</option><option value="0.8">ruhig</option><option value="1" selected>normal</option></select>
+</div></details>
+<div class="note" id="note">Auf diesem Gerät ist keine griechische Stimme installiert. Die Aussprache kann deshalb abweichen. Eine Stimme lässt sich in den Systemeinstellungen unter Sprache oder Bedienungshilfen nachladen.</div>
+
+<section id="learn"></section>
+
+<section id="listen" hidden>
+  <div id="lsetup">
+    <div class="meta">Alle Wörter, zufällige Reihenfolge, 2 Sekunden Pause</div>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:14px;font-size:.95rem"><input type="checkbox" id="screenChk" checked> Display anlassen (Helligkeit niedrig stellen spart Akku)</label>
+    <button class="primary" id="lgd" style="height:28vh;min-height:130px;font-size:1.3rem;margin-bottom:12px">Griechisch → Deutsch</button>
+    <button class="primary" id="ldg" style="height:28vh;min-height:130px;font-size:1.3rem">Deutsch → Griechisch</button>
+  </div>
+  <div id="lrunbox" hidden>
+    <div id="lstat" style="color:#7a7a7a;font-size:.85rem;margin-bottom:10px;min-height:2.6em"></div>
+    <button class="primary" id="lstop" style="height:62vh;min-height:260px;font-size:1.6rem;background:var(--bad)">Stopp</button>
+  </div>
+</section>
+<section id="quiz" hidden>
+  <div id="setup">
+    <div class="meta">Quiz-Art</div>
+    <div class="seg" id="modeSeg">
+      <button data-m="hear" aria-pressed="true">Hören → Deutsch</button>
+      <button data-m="read" aria-pressed="false">Deutsch → Griechisch</button>
+    </div>
+    <button class="primary" id="start">Quiz starten</button>
+  </div>
+  <div id="play" hidden>
+    <div class="meta" id="prog"></div>
+    <div class="q" id="qbox"></div>
+    <div id="opts"></div>
+    <button class="primary" id="next" hidden>Weiter</button>
+  </div>
+  <div id="end" class="res" hidden>
+    <div class="big" id="score"></div>
+    <p id="msg"></p>
+    <button class="primary" id="again">Nochmal</button>
+  </div>
+</section>
+</main>
+
+<script>
+const LESSONS=[{w:[
+["Γεια σου","ja su","Hallo","ja su"],["Καλημέρα","kaliméra","Guten Morgen","kaliméra"],["Καλησπέρα","kalispéra","Guten Abend","kalispéra"],
+["Ευχαριστώ","efcharistó","Danke","efcharistó"],["Παρακαλώ","parakaló","Bitte","parakaló"],["Ναι","ne","Ja","ne"],["Όχι","óchi","Nein","óchi"],
+["Συγγνώμη","syggnómi","Entschuldigung","sighnómi"],["Νερό","neró","Wasser","neró"],["Ψωμί","psomí","Brot","psomí"],["Καφές","kafés","Kaffee","kafés"],
+["Κρασί","krasí","Wein","krasí"],["Ελιά","eliá","Olive","eljá"],["Σπίτι","spíti","Haus","spíti"],["Θάλασσα","thálassa","Meer","thálasa"],
+["Ήλιος","ílios","Sonne","íljos"],["Φίλος","fílos","Freund","fílos"],["Παιδί","pedí","Kind","pedhí"],["Αγάπη","agápi","Liebe","aghápi"],
+["Ένα","éna","eins","éna"],["Δύο","dío","zwei","dhío"],["Τρία","tría","drei","tría"],["Καλό","kaló","gut","kaló"],["Μεγάλο","megálo","groß","meghálo"]
+]},{w:[
+["Τέσσερα","téssera","vier","tésera"],["Πέντε","pénde","fünf","pénde"],["Δέκα","déka","zehn","dhéka"],
+["Μαμά","mamá","Mama","mamá"],["Μπαμπάς","mpampás","Papa","bambás"],["Αδερφός","aderfós","Bruder","adherfós"],["Αδερφή","aderfí","Schwester","adherfí"],
+["Τι κάνεις;","ti kánis","Wie geht es dir?","ti kánis"],["Πού είναι;","pu íne","Wo ist …?","pu íne"],["Καληνύχτα","kaliníchta","Gute Nacht","kaliníchta"],
+["Τα λέμε","ta léme","Bis bald","ta léme"],["Καλή τύχη","kalí tíchi","Viel Glück","kalí tíchi"],
+["Λογαριασμός","logariasmós","Rechnung","loghariazmós"],["Γάλα","gála","Milch","ghála"],["Τυρί","tirí","Käse","tirí"],["Ψάρι","psári","Fisch","psári"],
+["Κρέας","kréas","Fleisch","kréas"],["Μήλο","mílo","Apfel","mílo"],["Δρόμος","drómos","Straße","dhrómos"],["Αεροπλάνο","aeropláno","Flugzeug","aeropláno"]
+]},{w:[
+["Κόκκινο","kókino","rot","kókino"],["Μπλε","mple","blau","ble"],["Πράσινο","prásino","grün","prásino"],
+["Κίτρινο","kítrino","gelb","kítrino"],["Άσπρο","áspro","weiß","áspro"],["Μαύρο","mávro","schwarz","máwro"],
+["Δευτέρα","deftéra","Montag","dheftéra"],["Τρίτη","tríti","Dienstag","tríti"],["Τετάρτη","tetárti","Mittwoch","tetárti"],
+["Πέμπτη","pémpti","Donnerstag","pémpti"],["Παρασκευή","paraskeví","Freitag","paraskewí"],["Σάββατο","sávato","Samstag","sáwato"],
+["Κυριακή","kiriakí","Sonntag","kiriakí"],["Σήμερα","símera","heute","símera"],["Αύριο","ávrio","morgen","áwrio"],
+["Εχθές","echthés","gestern","echthés"],["Πόσο κάνει;","póso káni","Was kostet das?","póso káni"],["Θέλω","thélo","ich möchte","thélo"],
+["Δεν καταλαβαίνω","den katalavéno","Ich verstehe nicht","dhen katalawéno"],["Μιλάτε αγγλικά;","miláte angliká","Sprechen Sie Englisch?","miláte angliká"]
+]},{w:[
+["Έξι","éxi","sechs","éksi"],["Εφτά","eftá","sieben","eftá"],["Οχτώ","ochtó","acht","ochtó"],["Εννέα","ennéa","neun","enéa"],
+["Είκοσι","íkosi","zwanzig","íkosi"],["Εκατό","ekató","hundert","ekató"],
+["Είμαι","íme","ich bin","íme"],["Έχω","écho","ich habe","écho"],["Πάω","páo","ich gehe","páo"],
+["Τρώω","tróo","ich esse","tróo"],["Πίνω","píno","ich trinke","píno"],["Μιλάω","miláo","ich spreche","miláo"],
+["Καταλαβαίνω","katalavaíno","ich verstehe","katalawéno"],["Ξέρω","xéro","ich weiß","kséro"],
+["Με λένε","me léne","Ich heiße …","me léne"],["Από πού είσαι;","apó pu íse","Woher kommst du?","apó pu íse"],
+["Τι ώρα είναι;","ti óra eínai","Wie spät ist es?","ti óra íne"],["Μου αρέσει","mu arései","es gefällt mir / ich mag","mu arési"],
+["Εντάξει","entáxei","in Ordnung","endáksi"],["Βοήθεια","voítheia","Hilfe","woíthia"],["Καλό ταξίδι","kaló taxídi","Gute Reise","kaló taksídhi"]
+]},{w:[
+["Εγώ","egó","ich","eghó"],
+["Πόλη","póli","Stadt","póli"],["Χωριό","chorió","Dorf","chorió"],["Παραλία","paralía","Strand","paralía"],
+["Εστιατόριο","estiatório","Restaurant","estiatório"],["Ξενοδοχείο","xenodocheío","Hotel","ksenodhochío"],["Δωμάτιο","domátio","Zimmer","dhomátio"],
+["Αεροδρόμιο","aerodrómio","Flughafen","aerodhrómio"],["Σταθμός","stathmós","Bahnhof / Haltestelle","stathmós"],["Λεωφορείο","leoforeío","Bus","leoforío"],
+["Τρένο","tréno","Zug","tréno"],["Εισιτήριο","eisitírio","Fahrkarte","isitírio"],["Τουαλέτα","toualéta","Toilette","tualéta"],
+["Φαρμακείο","farmakeío","Apotheke","farmakío"],["Τράπεζα","trápeza","Bank","trápeza"],
+["Αριστερά","aristerá","links","aristerá"],["Δεξιά","dexiá","rechts","dheksiá"],["Ευθεία","eutheía","geradeaus","efthía"],
+["Κοντά","kontá","nah","kondá"],["Μακριά","makriá","weit","makriá"],["Πολύ","polí","sehr / viel","polí"],["Λίγο","lígo","wenig","lígho"]
+]},{w:[
+["Φαγητό","fagitó","Essen","fajitó"],["Πρωινό","proinó","Frühstück","proinó"],["Μεσημεριανό","mesimerianó","Mittagessen","mesimerianó"],["Βραδινό","vradinó","Abendessen","wradhinó"],
+["Κατάλογος","katálogos","Speisekarte","katáloghos"],["Τραπέζι","trapézi","Tisch","trapézi"],["Ποτήρι","potíri","Glas","potíri"],["Μπουκάλι","mpoukáli","Flasche","bukáli"],
+["Μπύρα","mpýra","Bier","bíra"],["Χυμός","chymós","Saft","chimós"],["Τσάι","tsái","Tee","tsái"],
+["Σαλάτα","saláta","Salat","saláta"],["Σούπα","soúpa","Suppe","súpa"],["Κοτόπουλο","kotópoulo","Hähnchen","kotópulo"],["Πατάτες","patátes","Kartoffeln / Pommes","patátes"],
+["Ρύζι","rýzi","Reis","rízi"],["Αυγό","avgó","Ei","awghó"],["Ντομάτα","ntomáta","Tomate","domáta"],["Φρούτο","froúto","Obst / Frucht","frúto"],
+["Ζάχαρη","záchari","Zucker","záchari"],["Αλάτι","aláti","Salz","aláti"],["Πιπέρι","pipéri","Pfeffer","pipéri"],["Γλυκό","glykó","süß / Nachtisch","ghlikó"],
+["Πεινάω","peináo","ich habe Hunger","pináo"],["Διψάω","dipsáo","ich habe Durst","dhipsáo"],
+["Ένα τραπέζι για δύο, παρακαλώ","éna trapézi gia dýo parakaló","Einen Tisch für zwei, bitte","éna trapézi ja dhío parakaló"],
+["Τον κατάλογο, παρακαλώ","ton katálogo parakaló","Die Speisekarte, bitte","ton katálogho parakaló"],
+["Τον λογαριασμό, παρακαλώ","ton logariasmó parakaló","Die Rechnung, bitte","ton loghariazmó parakaló"],
+["Είμαι χορτοφάγος","íme chortofágos","Ich bin Vegetarier","íme chortofághos"],
+["Χωρίς κρέας, παρακαλώ","chorís kréas parakaló","Ohne Fleisch, bitte","chorís kréas parakaló"],
+["Πολύ νόστιμο","polí nóstimo","Sehr lecker","polí nóstimo"],["Καλή όρεξη","kalí órexi","Guten Appetit","kalí óreksi"],["Στην υγειά μας","stin ygeiá mas","Zum Wohl / Prost","stin ijá mas"]
+]},{w:[
+["Μαγαζί","magazí","Geschäft","maghazí"],["Αγορά","agorá","Markt","aghorá"],["Σούπερ μάρκετ","soúper márket","Supermarkt","súper márket"],
+["Τιμή","timí","Preis","timí"],["Φθηνό","fthinó","billig","fthinó"],["Ακριβό","akrivó","teuer","akriwó"],["Έκπτωση","ékptosi","Rabatt","ékptosi"],["Ευρώ","evró","Euro","ewró"],
+["Μετρητά","metritá","Bargeld","metritá"],["Κάρτα","kárta","Karte","kárta"],["Τσάντα","tsánta","Tasche","tsánda"],["Δώρο","dóro","Geschenk","dhóro"],
+["Ρούχα","roúcha","Kleidung","rúcha"],["Πουκάμισο","poukámiso","Hemd","pukámiso"],["Παντελόνι","pantelóni","Hose","pandelóni"],["Φόρεμα","fórema","Kleid","fórema"],
+["Παπούτσια","papoútsia","Schuhe","papútsia"],["Καπέλο","kapélo","Hut / Mütze","kapélo"],["Μέγεθος","mégethos","Größe","méjethos"],["Μικρό","mikró","klein","mikró"],["Άλλο","állo","anderes","álo"],
+["Αγοράζω","agorázo","ich kaufe","aghorázo"],["Πληρώνω","pliróno","ich bezahle","pliróno"],["Ψάχνω","psáchno","ich suche","psáchno"],["Δοκιμάζω","dokimázo","ich probiere (an)","dhokimázo"],
+["Μπορώ να το δοκιμάσω;","mporó na to dokimáso","Kann ich es anprobieren?","boró na to dhokimáso"],
+["Έχετε άλλο μέγεθος;","échete állo mégethos","Haben Sie eine andere Größe?","échete álo méjethos"],
+["Είναι πολύ ακριβό","eínai polí akrivó","Es ist sehr teuer","íne polí akriwó"],
+["Μόνο κοιτάζω, ευχαριστώ","móno kitázo, efcharistó","Ich schaue nur, danke","móno kitázo efcharistó"],
+["Δέχεστε κάρτες;","décheste kártes","Nehmen Sie Karten an?","dhécheste kártes"],
+["Θα το πάρω","tha to páro","Ich nehme es","tha to páro"],
+["Τίποτα άλλο, ευχαριστώ","típota állo, efcharistó","Sonst nichts, danke","típota álo efcharistó"]
+]},{w:[
+["Οικογένεια","oikogéneia","Familie","ikojénia"],["Γιος","gios","Sohn","jos"],["Κόρη","kóri","Tochter","kóri"],["Παππούς","pappoús","Großvater","papús"],["Γιαγιά","giagiá","Großmutter","jajá"],
+["Άντρας","ántras","Mann","ándras"],["Γυναίκα","gynaíka","Frau","jinéka"],
+["Κεφάλι","kefáli","Kopf","kefáli"],["Μάτι","máti","Auge","máti"],["Αυτί","autí","Ohr","aftí"],["Μύτη","mýti","Nase","míti"],["Στόμα","stóma","Mund","stóma"],
+["Δόντι","dónti","Zahn","dhóndi"],["Λαιμός","laimós","Hals","lemós"],["Χέρι","chéri","Hand","chéri"],["Πόδι","pódi","Fuß","pódhi"],["Πλάτη","pláti","Rücken","pláti"],
+["Καρδιά","kardiá","Herz","kardhiá"],["Στομάχι","stomáchi","Magen","stomáchi"],
+["Γιατρός","giatrós","Arzt","jatrós"],["Νοσοκομείο","nosokomeío","Krankenhaus","nosokomío"],["Φάρμακο","fármako","Medikament","fármako"],
+["Πόνος","pónos","Schmerz","pónos"],["Πυρετός","pyretós","Fieber","piretós"],["Άρρωστος","árrostos","krank","árostos"],["Υγεία","ygeía","Gesundheit","ijía"],
+["Πονάω","ponáo","ich habe Schmerzen","ponáo"],["Νιώθω","niótho","ich fühle","njótho"],["Κοιμάμαι","koimámai","ich schlafe","kimáme"],["Ξυπνάω","xypnáo","ich wache auf","ksipnáo"],
+["Πονάει το κεφάλι μου","ponáei to kefáli mou","Ich habe Kopfschmerzen","ponái to kefáli mu"],
+["Χρειάζομαι γιατρό","chreiázomai giatró","Ich brauche einen Arzt","chriázome jatró"],
+["Δεν αισθάνομαι καλά","den aisthánomai kalá","Mir geht es nicht gut","dhen esthánome kalá"],
+["Έχω πυρετό","écho pyretó","Ich habe Fieber","écho piretó"],
+["Πού είναι το φαρμακείο;","pou eínai to farmakeío","Wo ist die Apotheke?","pu íne to farmakío"],
+["Καλή ανάρρωση","kalí anárrosi","Gute Besserung","kalí anárosi"]
+]}];
+const ALL=LESSONS.flatMap(l=>l.w);let W=LESSONS[0].w;
+const $=s=>document.querySelector(s);
+function setW(){const v=$('#lesson').value;W=v==='all'?ALL:LESSONS[+v].w;}
+function refresh(){setW();renderLearn();updStart();}
+$('#goal').textContent=ALL.length+' von 500 Wörtern verfügbar';
+$('#goalbar').style.width=Math.min(100,ALL.length/5)+'%';
+let voice=null;
+let chosenURI=null,rate=1,deVoice=null;
+function pickVoice(){
+  try{
+    const v=speechSynthesis.getVoices();
+    const el=v.filter(x=>/^el([-_]|$)/i.test(x.lang));
+    const sel=$('#voiceSel');
+    if(sel.options.length!==el.length){sel.innerHTML=el.map(x=>`<option value="${x.voiceURI}">${x.name} (${x.lang})</option>`).join('');}
+    voice=el.find(x=>x.voiceURI===chosenURI)||el[0]||null;
+    if(voice)sel.value=voice.voiceURI;
+    deVoice=v.find(x=>/^de([-_]|$)/i.test(x.lang))||null;
+    $('#note').style.display=(v.length&&!voice)?'block':'none';
+  }catch(e){}
+}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
+setTimeout(()=>{try{if(!speechSynthesis.getVoices().length)warn('In dieser Ansicht gibt es keine Sprachausgabe. Öffne die Seite direkt im Browser (Opera oder Chrome), dann hörst du die Wörter.');}catch(e){warn('In dieser Ansicht gibt es keine Sprachausgabe. Öffne die Seite direkt im Browser (Opera oder Chrome), dann hörst du die Wörter.');}},2000);
+$('#voiceSel').onchange=e=>{chosenURI=e.target.value;pickVoice();say('Καλημέρα');};
+$('#rateSel').onchange=e=>{rate=+e.target.value;say('Καλημέρα');};
+function warn(m){const n=$('#note');n.textContent=m;n.style.display='block';}
+function say(t){
+  if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){warn('Die Sprachausgabe wird in dieser Ansicht nicht unterstützt. Öffne die Seite im Browser (Safari oder Chrome) über „Link teilen“ und teste dort noch einmal.');return;}
+  try{
+    pickVoice();
+    const s=speechSynthesis;s.cancel();
+    setTimeout(()=>{
+      const u=new SpeechSynthesisUtterance(t);u.lang='el-GR';if(voice)u.voice=voice;u.rate=rate;u.volume=1;
+      u.onerror=ev=>{if(ev.error&&ev.error!=='canceled'&&ev.error!=='interrupted')warn('Audio konnte nicht abgespielt werden ('+ev.error+'). Prüfe Lautstärke und Stumm-Schalter, oder öffne die Seite direkt im Browser.');};
+      s.resume();s.speak(u);
+    },60);
+  }catch(e){warn('Audio konnte nicht gestartet werden. Öffne die Seite direkt im Browser.');}
+}
+const learn=$('#learn');
+function renderLearn(){
+  learn.innerHTML='';
+  learn.insertAdjacentHTML('beforeend','<details class="note" style="display:block"><summary style="cursor:pointer;font-weight:600">Ausspracheregeln</summary><div style="margin-top:6px;line-height:1.6"><b>Buchstaben:</b> β = w (wie deutsches „w“ in „Wasser“, so auch das υ in αυ / ευ), δ = dh (wie engl. „this“), θ = th (wie engl. „think“), χ = ch (wie in „ich“ / „Bach“), γ = gh (weiches g) vor α, ο, ου, z. B. Αγορά = aghorá; γ = j vor ε, ι, η, υ, ει, οι, z. B. Μέγεθος = méjethos. Der Akzent ´ zeigt die betonte Silbe.<br><b>Doppellaute:</b> μπ = b am Wortanfang, in der Mitte mb (viele sprechen nur b), ντ = d am Wortanfang, in der Mitte nd (viele sprechen nur d), γκ = g am Wortanfang, in der Mitte ng, γγ = ng (άγγελος = ángelos; Ausnahme Συγγνώμη = sighnómi), τσ = ts, τζ = dz, ου = u, αι = e, ει / οι / η / υ / ι = i.<br><b>αυ und ευ:</b> vor stimmlosen Lauten (κ π τ φ θ χ σ ξ ψ) af / ef, sonst (vor Vokalen und stimmhaften Lauten) aw / ew. Beispiele: Ευχαριστώ = efcharistó, Ευρώ = ewró, Αυγό = awghó.<br><b>Umschrift</b> gibt die Buchstaben wieder, <b>Aussprache</b> zeigt, wie es klingt.</div></details>');
+  W.forEach((w,i)=>{
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML=`<button class="play" aria-label="Anhören: ${w[2]}" data-i="${i}">▶</button><div class="t"><div class="gr">${w[0]}</div><div class="tr">Umschrift: ${w[1]}</div><div class="ph">Aussprache: <b>${w[3]}</b></div><div class="de">${w[2]}</div></div>`;
+    learn.appendChild(d);
+  });
+}
+renderLearn();
+function updStart(){$('#start').textContent='Quiz starten ('+W.length+' Wörter, falsche kommen dreimal wieder)';}
+updStart();
+$('#lesson').onchange=()=>{refresh();$('#play').hidden=true;$('#end').hidden=true;$('#setup').hidden=false;};
+learn.addEventListener('click',e=>{
+  const b=e.target.closest('.play');if(b)say(W[b.dataset.i][0]);});
+
+function tab(n){
+  if(n!=3&&typeof stopListen==='function')stopListen();
+  [1,2,3].forEach(i=>$('#t'+i).setAttribute('aria-selected',n==i));
+  $('#learn').hidden=n!=1;$('#quiz').hidden=n!=2;$('#listen').hidden=n!=3;
+  $('#lesson').hidden=n==3;
+  $('#goal').hidden=n!=1;$('#goalwrap').hidden=n!=1;
+}
+$('#t1').onclick=()=>tab(1);$('#t2').onclick=()=>tab(2);$('#t3').onclick=()=>tab(3);
+
+let mode='hear',qs=[],qi=0,score=0,answered=false,total=0,seen=new Set(),isRepeat=false,rc=new Map(),usedWrong=new Map(),rk=0;
+$('#modeSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;
+  document.querySelectorAll('#modeSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b));};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function start(){
+  qs=shuffle(W);total=qs.length;seen=new Set();rc=new Map();usedWrong=new Map();qi=0;score=0;
+  $('#setup').hidden=true;$('#end').hidden=true;$('#play').hidden=false;ask();
+}
+function ask(){
+  answered=false;const w=qs[qi];isRepeat=seen.has(w);seen.add(w);rk=isRepeat?(rc.get(w)||0)+1:0;
+  $('#prog').textContent=`Frage ${qi+1} von ${qs.length} · Gleich richtig: ${score}`;
+  const box=$('#qbox');
+  const badge=isRepeat?`<div style="display:inline-block;background:var(--acc2);color:var(--acc);border-radius:20px;padding:3px 12px;font-size:.85rem;font-weight:600;margin-bottom:10px">Wiederholung ${rk} von 3</div><br>`:'';
+  box.innerHTML=badge+(mode==='hear'
+    ?`<button class="play" id="rep" aria-label="Nochmal anhören" style="width:64px;height:64px;font-size:1.6rem">▶</button><div class="tr" style="margin-top:8px">Was bedeutet das Wort?</div>`
+    :`<div class="tr">Wie heißt das auf Griechisch?</div><div class="gr" style="font-family:inherit;font-size:1.7rem">${w[2]}</div>`);
+  if(mode==='hear'){$('#rep').onclick=()=>say(w[0]);setTimeout(()=>say(w[0]),250);}
+  const pool=W.length>=4?W:ALL;
+  const used=usedWrong.get(w)||new Set();
+  const cand=shuffle(pool.filter(x=>x!==w&&x[2]!==w[2]));
+  let others=cand.filter(x=>!used.has(x)).slice(0,3);
+  if(others.length<3)others=others.concat(cand.filter(x=>!others.includes(x)).slice(0,3-others.length));
+  if(others.length<3)others=others.concat(shuffle(ALL.filter(x=>x!==w&&x[2]!==w[2]&&!others.includes(x))).slice(0,3-others.length));
+  others.forEach(x=>used.add(x));usedWrong.set(w,used);
+  const opts=shuffle([w,...others]);
+  const o=$('#opts');o.innerHTML='';
+  opts.forEach(x=>{
+    const b=document.createElement('button');b.className='opt';
+    b.textContent=mode==='hear'?x[2]:`${x[0]}  (${x[1]})`;
+    b.onclick=()=>pick(b,x===w,w);o.appendChild(b);
+  });
+  $('#next').hidden=true;
+}
+function scheduleRepeats(w){
+  rc.set(w,0);
+  for(let i=qs.length-1;i>qi;i--)if(qs[i]===w)qs.splice(i,1);
+  let pos=qi;
+  for(let n=0;n<3;n++){pos+=3+Math.floor(Math.random()*5);qs.splice(Math.min(pos,qs.length),0,w);}
+}
+function updNav(){
+  $('#prog').textContent=`Frage ${qi+1} von ${qs.length} · Gleich richtig: ${score}`;
+  $('#next').textContent=qi+1<qs.length?'Weiter':'Ergebnis';$('#next').hidden=false;
+}
+function pick(b,right,w){
+  if(answered)return;answered=true;
+  if(right){b.classList.add('ok');if(!isRepeat)score++;else rc.set(w,rk);}
+  else{
+    if(b)b.classList.add('bad');scheduleRepeats(w);
+  }
+  document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;
+    if(mode==='hear'?x.textContent===w[2]:x.textContent.startsWith(w[0]))x.classList.add('ok');});
+  if(mode==='read')say(w[0]);
+  $('#qbox').insertAdjacentHTML('beforeend',`<div class="gr" style="margin-top:10px">${w[0]}</div><div class="tr">Aussprache: ${w[3]} · ${w[2]}</div>`);
+  const rb=document.createElement('button');
+  rb.style.cssText='margin-top:12px;padding:9px 14px;border:1px solid var(--acc);background:var(--acc2);color:var(--acc);border-radius:10px;font-weight:600;font-size:.9rem';
+  if(right){
+    rb.textContent='Zur Wiederholung schicken';
+    rb.onclick=()=>{scheduleRepeats(w);rb.remove();updNav();};
+  }
+  if(right)$('#qbox').appendChild(rb);
+  updNav();
+}
+$('#next').onclick=()=>{qi++;if(qi<qs.length)ask();else finish();};
+function finish(){
+  $('#play').hidden=true;$('#end').hidden=false;
+  $('#score').textContent=`${score} / ${total}`;
+  $('#msg').textContent=(score/total>=.9?'Ausgezeichnet, fast alles gleich beim ersten Mal.':score/total>=.6?'Gut gemacht.':'Das war eine harte Runde, aber jede falsche Vokabel hast du dreimal richtig wiederholt.')+' Die Zahl zeigt, wie viele Wörter gleich beim ersten Mal saßen.';
+}
+$('#start').onclick=start;
+$('#again').onclick=()=>{$('#end').hidden=true;$('#setup').hidden=false;refresh();};
+
+/* ---- Hören ---- */
+let lrun=0,lwake=null;
+/* ---- Wach halten ---- */
+let keepV=null,keepA=null;
+function keepAwake(){
+  try{
+    if(!keepV){
+      keepV=document.createElement('video');keepV.setAttribute('playsinline','');keepV.muted=true;keepV.loop=true;
+      keepV.style.cssText='position:fixed;width:72px;height:72px;opacity:1;pointer-events:none;bottom:12px;right:12px;background:#000;z-index:1';keepV.disablePictureInPicture=true;
+      const a=document.createElement('source');a.src='data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAI/EU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggEeTbuMU6uEHFO7a1OsggIp7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjAuMTYuMTAwV0GNTGF2ZjYwLjE2LjEwMESJiECPQAAAAAAAFlSua8GuAQAAAAAAADjXgQFzxYjkmn4311QDApyBACK1nIN1bmSIgQCGhVZfVlA4g4EBI+ODhAvrwgDgibCBELqBEJqBAhJUw2f8c3OgY8CAZ8iaRaOHRU5DT0RFUkSHjUxhdmY2MC4xNi4xMDBzc9ZjwItjxYjkmn4311QDAmfIoUWjh0VOQ09ERVJEh5RMYXZjNjAuMzEuMTAyIGxpYnZweGfIoUWjiERVUkFUSU9ORIeTMDA6MDA6MDEuMDAwMDAwMDAwAB9DtnVAhOeBAKOjgQAAgBACAJ0BKhAAEAAARwiFhYiFhIgCAgAMDWAA/v+rUICjlYEAyACxAQAFEKwAGAAYWC/0AAgAAKOVgQGQALEBAAUQrAAYABhYL/QACAAAo5WBAlgAsQEABRCsABgAGFgv9AAIAACjlYEDIACxAQAFEKwAGAAYWC/0AAgAABxTu2uRu4+zgQC3iveBAfGCAZ/wgQM=';a.type='video/webm';
+      const b=document.createElement('source');b.src='data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAANzbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAp10cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAA+gAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAABAAAAAQAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAPoAAAQAAABAAAAAAIVbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAoAAAAKABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABwG1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAYBzdGJsAAAAvHN0c2QAAAAAAAAAAQAAAKxhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAABAAEABIAAAASAAAAAAAAAABFUxhdmM2MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAAMmF2Y0MBZAAK/+EAF2dkAAqs2V7ARAAAAwAEAAADACg8SJZYAQAEaO+Py/34+AAAAAAQcGFzcAAAAAEAAAABAAAAFGJ0cnQAAAAAAAAXsAAAF7AAAAAYc3R0cwAAAAAAAAABAAAABQAACAAAAAAUc3RzcwAAAAAAAAABAAAAAQAAADhjdHRzAAAAAAAAAAUAAAABAAAQAAAAAAEAACgAAAAAAQAAEAAAAAABAAAAAAAAAAEAAAgAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAAFAAAAAQAAAChzdHN6AAAAAAAAAAAAAAAFAAACxgAAAAwAAAAMAAAADAAAAAwAAAAUc3RjbwAAAAAAAAABAAADowAAAGJ1ZHRhAAAAWm1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALWlsc3QAAAAlqXRvbwAAAB1kYXRhAAAAAQAAAABMYXZmNjAuMTYuMTAwAAAACGZyZWUAAAL+bWRhdAAAAqwGBf//qNxF6b3m2Ui3lizYINkj7u94MjY0IC0gY29yZSAxNjQgcjMxMDggMzFlMTlmOSAtIEguMjY0L01QRUctNCBBVkMgY29kZWMgLSBDb3B5bGVmdCAyMDAzLTIwMjMgLSBodHRwOi8vd3d3LnZpZGVvbGFuLm9yZy94MjY0Lmh0bWwgLSBvcHRpb25zOiBjYWJhYz0xIHJlZj0xIGRlYmxvY2s9MTowOjAgYW5hbHlzZT0weDM6MHgxMTMgbWU9aGV4IHN1Ym1lPTIgcHN5PTEgcHN5X3JkPTEuMDA6MC4wMCBtaXhlZF9yZWY9MCBtZV9yYW5nZT0xNiBjaHJvbWFfbWU9MSB0cmVsbGlzPTAgOHg4ZGN0PTEgY3FtPTAgZGVhZHpvbmU9MjEsMTEgZmFzdF9wc2tpcD0xIGNocm9tYV9xcF9vZmZzZXQ9MCB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTEga2V5aW50PTI1MCBrZXlpbnRfbWluPTUgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD0xMCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIzLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IGlwX3JhdGlvPTEuNDAgYXE9MToxLjAwAIAAAAASZYiEABL/5P8F4P70O193s/+BAAAACEGaJBiH//7gAAAACEGeQkIIf6uBAAAACAGeYUQ//7OAAAAACAGeY0Q//7OB';b.type='video/mp4';
+      keepV.appendChild(a);keepV.appendChild(b);document.body.appendChild(keepV);
+    }
+    if($('#screenChk').checked)keepV.play().catch(()=>{});
+    if(!keepA){keepA=new Audio('data:audio/wav;base64,UklGRmQfAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAfAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==');keepA.loop=true;}
+    keepA.play().catch(()=>{});
+    if('mediaSession' in navigator){
+      navigator.mediaSession.metadata=new MediaMetadata({title:'Griechisch hören',artist:'Vokabeltrainer'});
+      navigator.mediaSession.setActionHandler('pause',()=>stopListen());
+      navigator.mediaSession.setActionHandler('stop',()=>stopListen());
+    }
+  }catch(e){}
+}
+function releaseAwake(){try{if(keepV)keepV.pause();if(keepA)keepA.pause();}catch(e){}}
+document.addEventListener('visibilitychange',async()=>{
+  if(!document.hidden&&lrun&&$('#lrunbox')&&!$('#lrunbox').hidden){
+    if($('#screenChk').checked&&!lwake)await getWake();
+  }
+});
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function speakP(text,lang,vo){return new Promise(res=>{
+  let t;const fin=()=>{clearTimeout(t);res();};
+  try{
+    const u=new SpeechSynthesisUtterance(text);u.lang=lang;if(vo)u.voice=vo;u.rate=rate;
+    u.onend=fin;u.onerror=fin;t=setTimeout(fin,6000+text.length*200);
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  }catch(e){fin();}
+});}
+async function getWake(){
+  const st=$('#lstat');
+  if(!navigator.wakeLock){st.textContent='Display-Sperre in dieser Ansicht nicht möglich. Stelle unter Einstellungen → Display die Ausschaltzeit auf 30 Minuten.';return;}
+  try{
+    lwake=await navigator.wakeLock.request('screen');
+    lwake.addEventListener('release',()=>{lwake=null;});
+    st.textContent='Display-Sperre aktiv.';
+  }catch(e){st.textContent='Display-Sperre wurde abgelehnt ('+(e&&e.name||'Fehler')+'). Stelle unter Einstellungen → Display die Ausschaltzeit auf 30 Minuten.';}
+}
+async function listenRun(dir){
+  const tok=++lrun;
+  $('#lsetup').hidden=true;$('#lrunbox').hidden=false;document.body.classList.add('run');
+  keepAwake();
+  $('#lstat').textContent='';
+  if($('#screenChk').checked)await getWake();
+  pickVoice();
+  while(tok===lrun){
+    for(const w of shuffle(ALL)){
+      if(tok!==lrun)return;
+      if(dir==='gd'){
+        await speakP(w[0],'el-GR',voice);if(tok!==lrun)return;
+        await sleep(2000);if(tok!==lrun)return;
+        await speakP(w[2],'de-DE',deVoice);
+      }else{
+        await speakP(w[2],'de-DE',deVoice);if(tok!==lrun)return;
+        await sleep(2000);if(tok!==lrun)return;
+        await speakP(w[0],'el-GR',voice);
+      }
+      if(tok!==lrun)return;
+      await sleep(2000);
+    }
+  }
+}
+function stopListen(){
+  lrun++;try{speechSynthesis.cancel();}catch(e){}
+  try{if(lwake){lwake.release();lwake=null;}}catch(e){}
+  releaseAwake();
+  $('#lsetup').hidden=false;$('#lrunbox').hidden=true;document.body.classList.remove('run');
+}
+$('#lgd').onclick=()=>listenRun('gd');
+$('#ldg').onclick=()=>listenRun('dg');
+$('#lstop').onclick=stopListen;
+</script>
+</body>
+</html>
