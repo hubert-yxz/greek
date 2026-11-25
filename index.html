@@ -77,6 +77,7 @@ body.run #lstop{background:#1a1a1a!important;color:#9a9a9a!important;border:1px 
 <section id="listen" hidden>
   <div id="lsetup">
     <div class="meta">Alle Wörter, zufällige Reihenfolge, 2 Sekunden Pause</div>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:.95rem"><input type="checkbox" id="loopChk"> Nach dem letzten Wort von vorn beginnen</label>
     <label style="display:flex;gap:8px;align-items:center;margin-bottom:14px;font-size:.95rem"><input type="checkbox" id="screenChk" checked> Display anlassen (Helligkeit niedrig stellen spart Akku)</label>
     <button class="primary" id="lgd" style="height:28vh;min-height:130px;font-size:1.3rem;margin-bottom:12px">Griechisch → Deutsch</button>
     <button class="primary" id="ldg" style="height:28vh;min-height:130px;font-size:1.3rem">Deutsch → Griechisch</button>
@@ -383,7 +384,9 @@ async function listenRun(dir){
   $('#lstat').textContent='';
   if($('#screenChk').checked)await getWake();
   pickVoice();
+  let pass=0;
   while(tok===lrun){
+    pass++;
     for(const w of shuffle(ALL)){
       if(tok!==lrun)return;
       if(dir==='gd'){
@@ -397,6 +400,12 @@ async function listenRun(dir){
       }
       if(tok!==lrun)return;
       await sleep(2000);
+    }
+    if(tok!==lrun)return;
+    if(!$('#loopChk').checked){
+      await speakP('Durchgang beendet. Alle '+ALL.length+' Wörter.','de-DE',deVoice);
+      if(tok===lrun)stopListen();
+      return;
     }
   }
 }
